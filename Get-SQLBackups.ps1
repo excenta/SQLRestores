@@ -87,9 +87,7 @@ foreach($Container in $Containers) {
     # Get the blobs in the container, but only the ones written after the time we specified. 
     $Blobs = Get-AzStorageBlob -Container $Container.Name -Context $Context | Where-Object {$_.LastModified -gt $After}
     # Ignore any master, model, msdb or perfmon
-    $Blobs = $Blobs | Where-Object {$_.Name -notlike '*master*'}
     $Blobs = $Blobs | Where-Object {$_.Name -notlike '*model*'}
-    $Blobs = $Blobs | Where-Object {$_.Name -notlike '*msdb*'}
     $Blobs = $Blobs | Where-Object {$_.Name -notlike '*PerfMon*'}
 
     # Download each blob to the Download location
