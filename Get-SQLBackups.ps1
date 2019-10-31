@@ -129,7 +129,9 @@ foreach($Item in $Items) {
 $SQLPassword = Get-KeyVaultSecretValue -KeyVaultName $KeyVaultName -KeyVaultToken $KeyVaultToken -SecretName $SQLSecretName
 
 # The Query we want to run
-[string]$query = $('EXEC  ' + $StoredProcedure + ' '  + $DatabaseMailProfile + ',' + $EmailAddress + ',' + $DownloadLocation)
+$query = @" 
+EXEC $StoredProcedure '$DatabaseMailProfile','$EmailAddress','$DownloadLocation'
+"@
 
 # Invoke the Query, to start the restores
 Invoke-Sqlcmd -Query $Query -Username 'sa' -Password $SQLPassword
