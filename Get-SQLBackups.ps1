@@ -15,6 +15,10 @@
 
     [parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
+    [string]$SQLSecretName,
+
+    [parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
     [string]$DatabaseMailProfile,
 
     [parameter(Mandatory=$true)]
@@ -122,7 +126,7 @@ foreach($Item in $Items) {
 }
 
 # Get the sa password, so the restore SQL script can be kicked off
-$SQLPassword = Get-KeyVaultSecretValue -KeyVaultName $KeyVaultName -KeyVaultToken $KeyVaultToken -SecretName 'vm-ext-rt01-sa'
+$SQLPassword = Get-KeyVaultSecretValue -KeyVaultName $KeyVaultName -KeyVaultToken $KeyVaultToken -SecretName $SQLSecretName
 
 # The Query we want to run
 [string]$query = $('EXEC  ' + $StoredProcedure + ' '  + $DatabaseMailProfile + ',' + $EmailAddress + ',' + $DownloadLocation)
