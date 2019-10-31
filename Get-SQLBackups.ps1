@@ -11,8 +11,19 @@
 
     [parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
-    [string]$DownloadLocation
+    [string]$DownloadLocation,
 
+    [parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [string]$DatabaseMailProfile,
+
+    [parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [string]$EmailAddress,
+
+    [parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [string]$StoredProcedure
 )
 
 function Get-KeyVaultAccessToken {
@@ -51,6 +62,9 @@ function Get-KeyVaultSecretValue {
 # Transcript log file
 $LogFileName = 'C:\Excenta\Transcript\LogFile-' + (Get-Date -Format dd-MM-yy-HH-mm-ss) + '.txt'
 Start-Transcript -Path $LogFileName -Force
+
+# Import sqlserver module
+Import-Module sqlserver
 
 # Get the Access Token from the Key Vault
 $KeyVaultToken = Get-KeyVaultAccessToken
@@ -106,3 +120,13 @@ foreach($Item in $Items) {
     Remove-Item $Item.FullName -Force -Verbose
 
 }
+
+# Get the sa password, so the restore SQL script can be kicked off
+$SQLPassword = Get-KeyVaultSecretValue -KeyVaultName $KeyVaultName -KeyVaultToken $KeyVaultToken -SecretName 'vm-ext-rt01-sa'
+
+# The Query we want to run
+[string]$query = $('EXEC  ' + $StoredProcedure + ' '  + $DatabaseMailProfile + ',' + $EmailAddress + ',' + $DownloadLocation)
+
+# Invoke the Query, to start the restores
+Invoke-Sqlcmd -Query $Query -Username 'sa' -Password $SQLPassword
+
